@@ -6,44 +6,35 @@ namespace ServerCore
 {
     class Program
     {
-        static void MainThread(object state)
+        volatile static bool _stop = false;
+
+        static void ThreadMain()
         {
-            for (int i=0; i<5; i++)
+            Console.WriteLine("Thread Start!");
+
+            while (_stop == false)
             {
-                Console.WriteLine("Hello Thread!");
+                // wait someone to call stop signal
             }
+
+            Console.WriteLine("Thread Stop!");
         }
+
         static void Main(string[] args)
         {
-            ThreadPool.SetMinThreads(1, 1);
-            ThreadPool.SetMaxThreads(5, 5);
-            for (int i = 0; i < 5; i++)
-                ThreadPool.QueueUserWorkItem((obj) => { while (true) {  } });
+            Task t = new Task(ThreadMain);
+            t.Start();
 
-            for (int i = 0; i < 5; i++)
-            {
-                Task t = new Task(() => { while (true) { Console.WriteLine("working..."); } }, TaskCreationOptions.LongRunning);
-                t.Start();
-            }
+            Thread.Sleep(1000);
 
+            _stop = true;
 
-            
+            Console.WriteLine("Call Stop");
+            Console.WriteLine("Waiting Stop");
 
-            ThreadPool.QueueUserWorkItem(MainThread);
+            t.Wait();
 
-            //Thread t = new Thread(MainThread);
-            //t.Name = "Test Thread";
-            //t.IsBackground = true;
-            //t.Start();
-            //Console.WriteLine("Waiting for Thread!");
-            //t.Join();
-
-            //Console.WriteLine("Hello World!");
-
-            while (true)
-            {
-
-            }
+            Console.WriteLine("Success Stop");
         }
     }
 }
