@@ -7,16 +7,30 @@ namespace ServerCore
     class Program
     {
         static int number = 0;
+        static object _obj = new object();
+
         static void Thread_1()
         {
             for (int i = 0; i < 100000; i++)
-                Interlocked.Increment(ref number);
+            {
+                // 상호 배제 Mutual Exclusive
+                Monitor.Enter(_obj); // lock
+
+                number++;
+                // return; 여기서 빠져나오면 락이 해제가 안되어버림. 데드락 DeadLock
+                Monitor.Exit(_obj);
+            }
         }
 
         static void Thread_2()
         {
             for (int i = 0; i < 100000; i++)
-                Interlocked.Decrement(ref number);
+            {
+                lock (_obj)
+                {
+                    number--;
+                }
+            }
         }
 
         static void Main(string[] args)
