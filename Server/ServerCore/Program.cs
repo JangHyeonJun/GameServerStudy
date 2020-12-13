@@ -4,35 +4,20 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    class Lock
-    {
-        // 커널 레벨의 bool lock이라고 생각해도됨.
-        // 커널 레벨의 컨텍스트 스위칭 비용이 발생함.
-        AutoResetEvent _available = new AutoResetEvent(true);
-
-        public void Acquire()
-        {
-            _available.WaitOne(); // 락 획득 시도 and Reset(lock = false;)
-        }
-
-        public void Release()
-        {
-            _available.Set(); // lock = true;
-        }
-    }
-
     class Program
     {
         static int _num = 0;
-        static Lock _lock = new Lock();
+
+        // ThreadId, lockCount 등의 정보를 추가적으로 가지고 있음.
+        static Mutex _lock = new Mutex(); // 커널 동기화 객체를 사용한 락이므로 비용이 큼.
 
         static void Thread_1()
         { 
             for(int i=0; i<100000; i++)
             {
-                _lock.Acquire();
+                _lock.WaitOne();
                 _num++;
-                _lock.Release();
+                _lock.ReleaseMutex();
             }
         }
 
@@ -40,9 +25,9 @@ namespace ServerCore
         {
             for (int i = 0; i < 100000; i++)
             {
-                _lock.Acquire();
+                _lock.WaitOne();
                 _num--;
-                _lock.Release();
+                _lock.ReleaseMutex();
             }
 
         }
