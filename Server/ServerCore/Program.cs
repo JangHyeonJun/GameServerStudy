@@ -22,6 +22,10 @@ namespace ServerCore
                                 
                 if (Interlocked.CompareExchange(ref _locked, desired, expected) == expected)
                     break;
+
+                // Thread.Sleep(1); // 무조건 1ms 정도 Sleep
+                // Thread.Sleep(0); // 우선순위가 나보다 같거나 높은 쓰레드가 있을 경우에만 Sleep
+                Thread.Yield();  // 지금 실행이 가능한 쓰레드가 있을 경우에만 Sleep
             }
         }
 
