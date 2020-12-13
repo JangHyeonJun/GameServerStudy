@@ -6,43 +6,46 @@ namespace ServerCore
 {
     class Program
     {
-        static int _num = 0;
+        static object _lock = new object();
+        static SpinLock _lock2 = new SpinLock();
+        static Mutex _lock3 = new Mutex(); // 프로세스간 동기화도 가능함
+        static ReaderWriterLockSlim _lock4 = new ReaderWriterLockSlim();
 
-        // ThreadId, lockCount 등의 정보를 추가적으로 가지고 있음.
-        static Mutex _lock = new Mutex(); // 커널 동기화 객체를 사용한 락이므로 비용이 큼.
+        class Reward { }
 
-        static void Thread_1()
-        { 
-            for(int i=0; i<100000; i++)
-            {
-                _lock.WaitOne();
-                _num++;
-                _lock.ReleaseMutex();
-            }
+        static Reward GetReward(int id)
+        {
+            _lock4.EnterReadLock();
+
+            _lock4.ExitReadLock();
+
+            return null;
         }
 
-        static void Thread_2()
+        static void AddReward(Reward reward)
         {
-            for (int i = 0; i < 100000; i++)
-            {
-                _lock.WaitOne();
-                _num--;
-                _lock.ReleaseMutex();
-            }
+            _lock4.EnterWriteLock();
 
+            _lock4.ExitWriteLock();
         }
 
         static void Main(string[] args)
         {
-            Task t1 = new Task(Thread_1);
-            Task t2 = new Task(Thread_2);
+            lock (_lock)
+            {
 
-            t1.Start();
-            t2.Start();
+            }
 
-            Task.WaitAll(t1, t2);
-
-            Console.WriteLine(_num);
+            bool lockTaken = false;
+            try
+            {
+                _lock2.Enter(ref lockTaken);
+            }
+            finally
+            {
+                if (lockTaken)
+                    _lock2.Exit();
+            }
         }
     }
 }
