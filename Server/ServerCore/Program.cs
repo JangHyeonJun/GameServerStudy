@@ -4,41 +4,27 @@ using System.Threading.Tasks;
 
 namespace ServerCore
 {
-    class SpinLock
+    class Lock
     {
-        volatile int _locked = 0;
+        // 커널 레벨의 bool lock이라고 생각해도됨.
+        // 커널 레벨의 컨텍스트 스위칭 비용이 발생함.
+        AutoResetEvent _available = new AutoResetEvent(true);
 
         public void Acquire()
         {
-            while(true)
-            {
-                //var original = Interlocked.Exchange(ref _locked, 1);
-                //if (original == 0)
-                //    break;
-
-                // CAS Compare-And-Swap
-                int expected = 0;
-                int desired = 1;
-                                
-                if (Interlocked.CompareExchange(ref _locked, desired, expected) == expected)
-                    break;
-
-                // Thread.Sleep(1); // 무조건 1ms 정도 Sleep
-                // Thread.Sleep(0); // 우선순위가 나보다 같거나 높은 쓰레드가 있을 경우에만 Sleep
-                Thread.Yield();  // 지금 실행이 가능한 쓰레드가 있을 경우에만 Sleep
-            }
+            _available.WaitOne(); // 락 획득 시도 and Reset(lock = false;)
         }
 
         public void Release()
         {
-            _locked = 0;
+            _available.Set(); // lock = true;
         }
     }
 
     class Program
     {
         static int _num = 0;
-        static SpinLock _lock = new SpinLock();
+        static Lock _lock = new Lock();
 
         static void Thread_1()
         { 
