@@ -6,46 +6,43 @@ namespace ServerCore
 {
     class Program
     {
-        static object _lock = new object();
-        static SpinLock _lock2 = new SpinLock();
-        static Mutex _lock3 = new Mutex(); // 프로세스간 동기화도 가능함
-        static ReaderWriterLockSlim _lock4 = new ReaderWriterLockSlim();
-
-        class Reward { }
-
-        static Reward GetReward(int id)
-        {
-            _lock4.EnterReadLock();
-
-            _lock4.ExitReadLock();
-
-            return null;
-        }
-
-        static void AddReward(Reward reward)
-        {
-            _lock4.EnterWriteLock();
-
-            _lock4.ExitWriteLock();
-        }
+        static volatile int count = 0;
+        static Lock _lock = new Lock();
 
         static void Main(string[] args)
         {
-            lock (_lock)
+            Task t1 = new Task(() =>
             {
+                for (int i = 0; i < 10000; i++)
+                {
+                    _lock.WriteLock();
+                    _lock.WriteLock();
+                    //_lock.ReadLock();
+                    count++;
+                    //_lock.ReadUnlock();
+                    _lock.WriteUnlock();
+                    _lock.WriteUnlock();
+                }
+            });
 
-            }
+            Task t2 = new Task(() =>
+            {
+                for (int i = 0; i < 10000; i++)
+                {
+                    _lock.WriteLock();
+                    //_lock.ReadLock();
+                    count--;
+                    //_lock.ReadUnlock();
+                    _lock.WriteUnlock();
+                }
+            });
 
-            bool lockTaken = false;
-            try
-            {
-                _lock2.Enter(ref lockTaken);
-            }
-            finally
-            {
-                if (lockTaken)
-                    _lock2.Exit();
-            }
+            t1.Start();
+            t2.Start();
+
+            Task.WaitAll(t1, t2);
+
+            Console.WriteLine(count);
         }
     }
 }
