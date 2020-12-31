@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ServerCore
 {
-    class Listener
+    public class Listener
     {
         Socket _listenSocket;
         Func<Session> _sessionFactory;
@@ -40,7 +40,7 @@ namespace ServerCore
             if (args.SocketError == SocketError.Success)
             {
                 Session session = _sessionFactory.Invoke();
-                session.Init(args.AcceptSocket);
+                session.Start(args.AcceptSocket);
                 session.OnConnected(args.AcceptSocket.RemoteEndPoint);
             }
             else

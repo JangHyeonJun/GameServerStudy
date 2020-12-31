@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace ServerCore
 {
-    abstract class Session
+    public abstract class Session
     {
         Socket _socket;
         int _disconnected = 0;
@@ -23,7 +23,7 @@ namespace ServerCore
         public abstract void OnSend(int numOfBytes);
         public abstract void OnDisconnected(EndPoint endPoint);
 
-        public void Init(Socket socket)
+        public void Start(Socket socket)
         {
             _socket = socket;
             _recvArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnRecvCompleted);
