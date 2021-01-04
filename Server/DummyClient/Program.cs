@@ -7,15 +7,28 @@ using System.Threading;
 
 namespace DummyClient
 {
+    class Packet
+    {
+        public ushort size;
+        public ushort packetId;
+    }
+
     class GameSession : Session
     {
         public override void OnConnected(EndPoint endPoint)
         {
             Console.WriteLine($"OnConnected: {endPoint}");
+            Packet packet = new Packet() { size = 4, packetId = 7 };
 
             for (int i = 0; i < 5; i++)
             {
-                byte[] sendBuff = Encoding.UTF8.GetBytes($"Hello World! {i}");
+                ArraySegment<byte> openSegment = SendBufferHelper.Open(4096);
+                byte[] hpBuff = BitConverter.GetBytes(packet.size);
+                byte[] atkBuff = BitConverter.GetBytes(packet.packetId);
+                Array.Copy(hpBuff, 0, openSegment.Array, openSegment.Offset, hpBuff.Length);
+                Array.Copy(atkBuff, 0, openSegment.Array, openSegment.Offset + hpBuff.Length, atkBuff.Length);
+                ArraySegment<byte> sendBuff = SendBufferHelper.Close(packet.size);
+
                 Send(sendBuff);
             }
 
