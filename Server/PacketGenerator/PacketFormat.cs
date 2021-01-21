@@ -49,7 +49,34 @@ class {0}
         // {0} member type
         // {1} member name
         public static string memberFormat =
-@"public {0} {1}";
+@"public {0} {1};";
+
+        // {0} list name [대문자]
+        // {1} list name [소문자]
+        // {2} members
+        // {3} member read
+        // {4} member write
+        public static string memberListFormat =
+@"
+public struct {0}
+{{
+    {2}
+
+
+    public void Read(ReadOnlySpan<byte> s, ref ushort count)
+    {{
+        {3}
+
+    }}
+
+    public bool Write(Span<byte> s, ref ushort count)
+    {{
+        bool success = true; 
+        {4}
+        return success;
+    }}
+}}
+public List<{0}> {1}s = new List<{0}>();";
 
         // {0} member name
         // {1} To~ member type
@@ -65,6 +92,20 @@ count += sizeof(ushort);
 this.{0} = Encoding.Unicode.GetString(s.Slice(count, {0}Len));
 count += {0}Len;
 ";
+
+        // {0} list name [대문자]
+        // {1} list name [소문자]
+        public static string readListFormat =
+@"this.{1}s.Clear();
+ushort {1}Len = BitConverter.ToUInt16(s.Slice(count, s.Length - count));
+count += sizeof(ushort);
+for(int i=0; i<{1}Len; i++)
+{{
+    {0} {1} = new {0}();
+    {1}.Read(s, ref count);
+    {1}s.Add({1});
+}}";
+
         // {0} member name
         // {1} member type
         public static string writeFormat =
@@ -77,5 +118,13 @@ count += sizeof({1});";
 success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), {0}Len);
 count += sizeof(ushort);
 count += {0}Len;";
+
+        // {0} list name [대문자]
+        // {1} list name [소문자]
+        public static string writeListFormat =
+@" success &= BitConverter.TryWriteBytes(s.Slice(count, s.Length - count), (ushort)this.{1}s.Count);
+count += sizeof(ushort);
+foreach ({0} {1} in this.{1}s)
+    success &= {1}.Write(s, ref count);";
     }
 }
