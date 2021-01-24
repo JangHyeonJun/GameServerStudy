@@ -80,7 +80,7 @@ class {0}
         // {4} member write
         public static string memberListFormat =
 @"
-public struct {0}
+public class {0}
 {{
     {2}
 
