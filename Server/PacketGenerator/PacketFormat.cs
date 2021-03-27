@@ -21,6 +21,13 @@ public enum PacketID
 }}
 
 {1}
+
+interface IPacket
+{{
+	ushort Protocol {{ get; }}
+	void Read(ArraySegment<byte> segment);
+	ArraySegment<byte> Write();
+}}
 ";
         // {0} packet name
         // {1} packet num
@@ -34,9 +41,11 @@ public enum PacketID
         // {3} member write
         public static string packetFormat =
 @"
-class {0}
+class {0} : IPacket
 {{
     {1}
+
+    public ushort Protocol {{ get {{ return (ushort)PacketID.{0}; }} }}
 
     public void Read(ArraySegment<byte> segment)
     {{
