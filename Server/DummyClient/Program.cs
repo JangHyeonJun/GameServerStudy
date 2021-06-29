@@ -19,20 +19,22 @@ namespace DummyClient
 
             Connector connector = new Connector();
 
-            connector.Connect(endPoint, () => { return new ServerSession(); });
+            connector.Connect(endPoint,
+                () => { return SessionManager.Instange.Generate(); },
+                10);
 
             while (true)
             {
                 try
                 {
-
+                    SessionManager.Instange.SendForEach();
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());
                 }
 
-                Thread.Sleep(100);
+                Thread.Sleep(250);
             }
         }
     }

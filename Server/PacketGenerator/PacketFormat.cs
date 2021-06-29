@@ -15,16 +15,8 @@ using System.Collections.Generic;
 class PacketManager
 {{
     #region Singleton
-    static PacketManager _instance;
-    public static PacketManager Instance
-    {{
-        get
-        {{
-            if (_instance == null)
-                _instance = new PacketManager();
-            return _instance;
-        }}
-    }}
+    static PacketManager _instance = new PacketManager();
+    public static PacketManager Instance { get { return _instance; } }
     #endregion
 
     Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>> _onRecv = new Dictionary<ushort, Action<PacketSession, ArraySegment<byte>>>();
@@ -32,7 +24,7 @@ class PacketManager
 
     public void Register()
     {{
-{0}
+        Register();
     }}
 
     public void OnRecvPacket(PacketSession session, ArraySegment<byte> buffer)
