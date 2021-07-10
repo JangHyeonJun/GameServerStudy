@@ -9,7 +9,6 @@ class PacketHandler
 {
     public static void C_ChatHandler(PacketSession session, IPacket packet)
     {
-        Console.WriteLine("C_ChatHandler");
         C_Chat chatPacket = packet as C_Chat;
         ClientSession clientSession = session as ClientSession;
 
