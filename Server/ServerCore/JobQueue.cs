@@ -9,6 +9,7 @@ namespace ServerCore
         void Push(Action job);
     }
 
+    // 실행해야할 task를 Queue에 담아두었다 한번에 처리한다.
     public class JobQueue : IJobQueue
     {
         Queue<Action> _jobQueue = new Queue<Action>();

@@ -10,6 +10,11 @@ namespace Server
         JobQueue _jobqueue = new JobQueue();
         List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
 
+        public void Push(Action job)
+        {
+            _jobqueue.Push(job);
+        }
+
         public void Flush()
         {
             foreach (ClientSession s in _sessions)
@@ -17,11 +22,6 @@ namespace Server
 
             Console.WriteLine($"Flushed: {_pendingList.Count} items");
             _pendingList.Clear();
-        }
-
-        public void Push(Action job)
-        {
-            _jobqueue.Push(job);
         }
 
         public void Broadcast(ClientSession session, string chat)
