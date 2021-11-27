@@ -8,16 +8,10 @@
 
 int main()
 {
-	// 윈속 초기화 (ws2_32 라이브러리 초기화)
-	// 관련 정보가 wsaData에 채워짐
 	WSAData wsaData;
 	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 		return 0;
 
-	// af : Address Family (AF_INET = IPv4)
-	// type : TCP(SOCK_STREAM)
-	// protocol : 0
-	// return : descriptor
 	SOCKET clientSocket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (clientSocket == INVALID_SOCKET)
 	{
@@ -31,13 +25,8 @@ int main()
 	SOCKADDR_IN serverAddr; // IPv4
 	::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
-	// serverAddr.sin_addr.s_addr = ::inet_addr("127.0.0.1") << DEPRECATED;
 	::inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
-	// host to network short
-	// Little		&  Big Endian
-	// 78|56|34|12     12|34|56|78
-	// 윈도우는 LittleEndian VS로 memory 켜보면 알 수 있다.
 	serverAddr.sin_port = ::htons(7777); 
 
 	if (::connect(clientSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
@@ -54,10 +43,37 @@ int main()
 	while (true)
 	{
 		// TODO
+		char sendBuffer[100] = "Hello World!";
+
+
+		for (int i = 0; i < 10; i++)
+		{
+			int32 resultCode = ::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
+			if (resultCode == SOCKET_ERROR)
+			{
+				int32 errCode = ::WSAGetLastError();
+				cout << "Send ErrorCode: " << errCode << endl;
+				return 0;
+			}
+		}
+
+		cout << "Send Data! Len = " << sizeof(sendBuffer) << endl;
+
+		/*char recvBuffer[1000];
+
+		int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+		if (recvLen < 0)
+		{
+			int32 errCode = ::WSAGetLastError();
+			cout << "Recv ErrorCode: " << errCode << endl;
+			return 0;
+		}
+
+		cout << "Recv Data! Data = " << recvBuffer << endl;
+		cout << "Recv Data! Len = " << recvLen << endl;*/
+
 		this_thread::sleep_for(1s);
 	}
-
-	// ----------------------------------
 
 	::closesocket(clientSocket);
 
